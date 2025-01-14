@@ -45,6 +45,7 @@ const ColumnContainer = (props: ColumnContainerProps) => {
     transition,
     transform: CSS.Transform.toString(transform),
   };
+  const taskCount = task.length;
 
   if (isDragging) {
     return (
@@ -60,7 +61,7 @@ const ColumnContainer = (props: ColumnContainerProps) => {
     <div
       ref={setNodeRef}
       style={style}
-      className="bg-white w-[350px] h-[80vh] max-h-[500px] rounded-md flex flex-col"
+      className="bg-white h-[80vh] max-h-[500px] rounded-md flex flex-col"
     >
       <div
         {...attributes}
@@ -70,7 +71,7 @@ const ColumnContainer = (props: ColumnContainerProps) => {
       >
         <div className="flex gap-2">
           <div className="flex justify-center items-center bg-zinc-200/40 px-2 py-1 text-sm rounded-full">
-            0
+            {taskCount}
           </div>
           {!editMode && column.title}
           {editMode && (

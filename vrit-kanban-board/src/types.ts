@@ -9,3 +9,13 @@ export type Task = {
   columnId: Id;
   content: string;
 };
+
+export type HistoryItem =
+  | {
+      type: "deleteColumn";
+      data: { column: Column; tasks: Task[] };
+    }
+  | {
+      type: "deleteTask";
+      data: Task;
+    };

@@ -1,6 +1,6 @@
-import { useMemo, useState } from "react";
-import { Plus } from "lucide-react";
-import { Column, Id, Task } from "../types";
+import { useEffect, useMemo, useState } from "react";
+import { Plus, Redo, Search, Undo } from "lucide-react";
+import { Column, HistoryItem, Id, Task } from "../types";
 import ColumnContainer from "./ColumnContainer";
 import {
   DndContext,
@@ -17,8 +17,18 @@ import { createPortal } from "react-dom";
 import TaskCard from "./TaskCard";
 
 const KanbanBoard = () => {
-  const [columns, setColumns] = useState<Column[]>([]);
-  const [task, setTask] = useState<Task[]>([]);
+  const [columns, setColumns] = useState<Column[]>(() => {
+    const savedColumns = localStorage.getItem("columns");
+    return savedColumns ? JSON.parse(savedColumns) : [];
+  });
+  const [task, setTask] = useState<Task[]>(() => {
+    const savedTasks = localStorage.getItem("tasks");
+    return savedTasks ? JSON.parse(savedTasks) : [];
+  });
+  const [history, setHistory] = useState<HistoryItem[]>([]);
+  const [redoStack, setRedoStack] = useState<HistoryItem[]>([]);
+  const [searchQuery, setSearchQuery] = useState<string>("");
+
   const columnsID = useMemo(() => columns.map((col) => col.id), [columns]);
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -29,6 +39,15 @@ const KanbanBoard = () => {
   );
   const [activeColumn, setActiveColumn] = useState<Column | null>(null);
   const [activeTask, setActiveTask] = useState<Task | null>(null);
+
+  useEffect(() => {
+    localStorage.setItem("columns", JSON.stringify(columns));
+  }, [columns]);
+
+  useEffect(() => {
+    localStorage.setItem("tasks", JSON.stringify(task));
+  }, [task]);
+
   const createColumn = () => {
     const columnToAdd: Column = {
       id: generateId(),
@@ -68,13 +87,74 @@ const KanbanBoard = () => {
   };
 
   const deleteColumn = (id: Id) => {
-    const newColumns = columns.filter((col) => col.id !== id);
-    setColumns(newColumns);
+    const columnToDelete = columns.find((col) => col.id === id);
+    const associatedTasks = task.filter((t) => t.columnId === id);
+
+    if (columnToDelete) {
+      setHistory((prev) => [
+        ...prev,
+        {
+          type: "deleteColumn",
+          data: { column: columnToDelete, tasks: associatedTasks },
+        },
+      ]);
+      setRedoStack([]);
+      setColumns(columns.filter((col) => col.id !== id));
+      setTask(task.filter((t) => t.columnId !== id));
+    }
   };
 
   const deleteTask = (id: Id) => {
-    const newTask = task.filter((t) => t.id !== id);
-    setTask(newTask);
+    const taskToDelete = task.find((t) => t.id === id);
+
+    if (taskToDelete) {
+      setHistory((prev) => [
+        ...prev,
+        { type: "deleteTask", data: taskToDelete },
+      ]);
+      setRedoStack([]);
+      setTask(task.filter((t) => t.id !== id));
+    }
+  };
+
+  const undo = () => {
+    if (history.length === 0) return;
+
+    const lastOperation = history.pop()!;
+    setRedoStack((prev) => [lastOperation, ...prev]);
+
+    if (lastOperation.type === "deleteColumn") {
+      const { column, tasks } = lastOperation.data;
+      setColumns((prev) => [...prev, column]);
+      setTask((prev) => [...prev, ...tasks]);
+    }
+
+    if (lastOperation.type === "deleteTask") {
+      setTask((prev) => [...prev, lastOperation.data]);
+    }
+
+    setHistory([...history]);
+  };
+
+  const redo = () => {
+    if (redoStack.length === 0) return;
+
+    const lastOperation = redoStack.shift()!;
+    setHistory((prev) => [...prev, lastOperation]);
+
+    if (lastOperation.type === "deleteColumn") {
+      const { column } = lastOperation.data;
+      setColumns((prev) => prev.filter((col) => col.id !== column.id));
+      setTask((prev) => prev.filter((task) => task.columnId !== column.id));
+    }
+
+    if (lastOperation.type === "deleteTask") {
+      setTask((prev) =>
+        prev.filter((task) => task.id !== lastOperation.data.id)
+      );
+    }
+
+    setRedoStack([...redoStack]);
   };
 
   const onDragStart = (e: DragStartEvent) => {
@@ -137,62 +217,120 @@ const KanbanBoard = () => {
       return arrayMove(columns, activeColumnIndex, overColumnIndex);
     });
   };
+
+  const filteredColumns = useMemo(() => {
+    if (!searchQuery) return columns;
+
+    const lowerCaseQuery = searchQuery.toLowerCase();
+
+    return columns.filter((col) => {
+      // Check if column title matches the search query
+      const columnMatches = col.title.toLowerCase().includes(lowerCaseQuery);
+
+      // Check if any task in the column matches the search query
+      const tasksInColumn = task.filter((t) => t.columnId === col.id);
+      const taskMatches = tasksInColumn.some((t) =>
+        t.content.toLowerCase().includes(lowerCaseQuery)
+      );
+
+      return columnMatches || taskMatches;
+    });
+  }, [searchQuery, columns, task]);
+
   return (
-    <div className="m-auto flex min-h-screen w-full items-center overflow-x-auto overflow-y-hidden p-[40px]">
-      <DndContext
-        sensors={sensors}
-        onDragOver={onDragOver}
-        onDragEnd={onDragEnd}
-        onDragStart={onDragStart}
-      >
-        <div className="m-auto flex gap-4">
-          <div className="flex gap-4">
-            <SortableContext items={columnsID}>
-              {columns.map((col) => (
-                <ColumnContainer
-                  updateTask={updateTask}
-                  deleteTask={deleteTask}
-                  updateColumn={updateColumn}
-                  key={col.id}
-                  deleteColumn={deleteColumn}
-                  column={col}
-                  createTask={createTask}
-                  task={task.filter((t) => t.columnId === col.id)}
-                />
-              ))}
-            </SortableContext>
-          </div>
+    <div className="">
+      <div className="p-4 mb-4 flex gap-2 justify-between">
+        <div className="flex md:flex-row flex-col gap-2 w-full">
+          <form action="" className="max-w-md w-full">
+            <div className="relative text-lg">
+              <Search
+                size={22}
+                className="absolute left-3 top-2.5 translate-y-1/2"
+              />
+              <input
+                id="search-card"
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search Card"
+                className="w-full pl-10 px-4 py-4 rounded-md outline-none border-2 border-zinc-200 hover:ring-2 hover:ring-zinc-300"
+              />
+            </div>
+          </form>
           <button
             onClick={createColumn}
-            className="flex gap-2 h-[60px] w-[350px] min-w-[350px] cursor-pointer rounded-lg bg-white border-2 border-zinc-200 p-4 hover:ring-2 hover:ring-zinc-300"
+            className="flex gap-2 cursor-pointer rounded-lg bg-white border-2 border-zinc-200 p-4 hover:ring-2 hover:ring-zinc-300"
           >
             <Plus /> Add Column
           </button>
         </div>
-        {createPortal(
-          <DragOverlay>
-            {activeColumn && (
-              <ColumnContainer
-                column={activeColumn}
-                deleteColumn={deleteColumn}
-                updateColumn={updateColumn}
-                createTask={createTask}
-                deleteTask={deleteTask}
-                updateTask={updateTask}
-                task={task.filter((t) => t.columnId === activeColumn.id)}
-              />
-            )}
-            {activeTask && (
-              <TaskCard
-                task={activeTask}
-                deleteTask={deleteTask}
-                updateTask={updateTask}
-              />
-            )}
-          </DragOverlay>,
-          document.body
-        )}
-      </DndContext>
+        <div className="flex items-center justify-center gap-2">
+          <button
+            onClick={undo}
+            className="bg-white p-4 box-content rounded-lg border-2 border-zinc-200 hover:ring-2 hover:ring-zinc-300"
+            disabled={history.length === 0}
+          >
+            <Undo />
+          </button>
+          <button
+            onClick={redo}
+            className="bg-white p-4 box-content rounded-lg border-2 border-zinc-200 hover:ring-2 hover:ring-zinc-300"
+            disabled={redoStack.length === 0}
+          >
+            <Redo />
+          </button>
+        </div>
+      </div>
+      <div className="m-auto p-4">
+        <DndContext
+          sensors={sensors}
+          onDragOver={onDragOver}
+          onDragEnd={onDragEnd}
+          onDragStart={onDragStart}
+        >
+          <div className=" gap-4">
+            <div className="grid w-full grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+              <SortableContext items={columnsID}>
+                {filteredColumns.map((col) => (
+                  <ColumnContainer
+                    updateTask={updateTask}
+                    deleteTask={deleteTask}
+                    updateColumn={updateColumn}
+                    key={col.id}
+                    deleteColumn={deleteColumn}
+                    column={col}
+                    createTask={createTask}
+                    task={task.filter((t) => t.columnId === col.id)}
+                  />
+                ))}
+              </SortableContext>
+            </div>
+          </div>
+          {createPortal(
+            <DragOverlay>
+              {activeColumn && (
+                <ColumnContainer
+                  column={activeColumn}
+                  deleteColumn={deleteColumn}
+                  updateColumn={updateColumn}
+                  createTask={createTask}
+                  deleteTask={deleteTask}
+                  updateTask={updateTask}
+                  task={task.filter((t) => t.columnId === activeColumn.id)}
+                />
+              )}
+              {activeTask && (
+                <TaskCard
+                  task={activeTask}
+                  deleteTask={deleteTask}
+                  updateTask={updateTask}
+                />
+              )}
+            </DragOverlay>,
+            document.body
+          )}
+        </DndContext>
+      </div>
     </div>
   );
 };

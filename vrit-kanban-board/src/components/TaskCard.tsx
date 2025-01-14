@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { Id, Task } from "../types";
-import { Trash } from "lucide-react";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import { Trash } from "lucide-react";
 
 interface TaskCardProps {
   task: Task;
