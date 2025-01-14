@@ -1,6 +1,9 @@
-# Vrit Kanban Board
+# Kanban Board
 
-Vrit Kanban Board is a feature-rich Kanban board application built with **React**, **TypeScript**, and **Vite**. It allows users to create, update, and delete columns and tasks, as well as drag-and-drop tasks between columns seamlessly.
+Kanban Board is a feature-rich Kanban board application built with **React**, **TypeScript**, and **Vite**. It allows users to create, update, and delete columns and tasks, as well as drag-and-drop tasks between columns seamlessly.
+
+https://github.com/user-attachments/assets/6a5a0208-b0b7-4b46-a91a-eb9be5ad2992
+
 
 ---
 
@@ -8,6 +11,7 @@ Vrit Kanban Board is a feature-rich Kanban board application built with **React*
 
 - Create, update, and delete columns and tasks
 - Drag-and-drop tasks between columns
+- Undo and Redo Functionality
 - Built with modern development tools and practices
 
 ---
@@ -26,7 +30,7 @@ Vrit Kanban Board is a feature-rich Kanban board application built with **React*
 
 1. **Clone the repository**:
    ```sh
-   git clone https://github.com/your-username/vrit-kanban-board.git
+   git clone https://github.com/samrosemohammed/task-vrit.git
    cd vrit-kanban-board
    
 2. Install Dependencies
@@ -55,17 +59,11 @@ For larger applications, a more robust solution like Redux or Zustand might be r
 - May experience performance degradation with a large number of tasks and columns.
 
 ## 🚧 Future Improvements
-1. State Management:
 - Integrate a state management library like Redux or Zustand for better handling of complex state interaction.
-2. Backend Integration
 - Add backend support to persist data and enable multi-user collaboration.
-3. Accessibility:
 - Enhance accessibility with keyboard navigation and screen reader support for drag-and-drop features.
-4. Testing:
 - Introduce unit and integration tests to ensure reliability and maintainability.
-5. Styling:
 - Elevate the UI/UX with advanced animations, transitions, and a more polished design.
-
 
 
 
