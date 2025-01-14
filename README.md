@@ -1,8 +1,8 @@
+# Kanban Board
+
+Kanban Board is a feature-rich Kanban board application built with **React**, **TypeScript**, and **Vite**. It allows users to create, update, and delete columns and tasks, as well as drag-and-drop tasks between columns seamlessly.
+
 https://github.com/user-attachments/assets/611a3265-c267-4abe-aa73-a74be1eb1aa5
-
-# Vrit Kanban Board
-
-Vrit Kanban Board is a feature-rich Kanban board application built with **React**, **TypeScript**, and **Vite**. It allows users to create, update, and delete columns and tasks, as well as drag-and-drop tasks between columns seamlessly.
 
 ---
 
@@ -10,6 +10,7 @@ Vrit Kanban Board is a feature-rich Kanban board application built with **React*
 
 - Create, update, and delete columns and tasks
 - Drag-and-drop tasks between columns
+- Undo and Redo Functionality
 - Built with modern development tools and practices
 
 ---
@@ -67,7 +68,6 @@ For larger applications, a more robust solution like Redux or Zustand might be r
 - Introduce unit and integration tests to ensure reliability and maintainability.
 5. Styling:
 - Elevate the UI/UX with advanced animations, transitions, and a more polished design.
-
 
 
 
