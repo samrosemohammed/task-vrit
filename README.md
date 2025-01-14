@@ -29,7 +29,7 @@ https://github.com/user-attachments/assets/611a3265-c267-4abe-aa73-a74be1eb1aa5
 
 1. **Clone the repository**:
    ```sh
-   git clone https://github.com/your-username/vrit-kanban-board.git
+   git clone https://github.com/samrosemohammed/task-vrit.git
    cd vrit-kanban-board
    
 2. Install Dependencies
@@ -58,15 +58,10 @@ For larger applications, a more robust solution like Redux or Zustand might be r
 - May experience performance degradation with a large number of tasks and columns.
 
 ## 🚧 Future Improvements
-1. State Management:
 - Integrate a state management library like Redux or Zustand for better handling of complex state interaction.
-2. Backend Integration
 - Add backend support to persist data and enable multi-user collaboration.
-3. Accessibility:
 - Enhance accessibility with keyboard navigation and screen reader support for drag-and-drop features.
-4. Testing:
 - Introduce unit and integration tests to ensure reliability and maintainability.
-5. Styling:
 - Elevate the UI/UX with advanced animations, transitions, and a more polished design.
 
 
