@@ -2,7 +2,8 @@
 
 Kanban Board is a feature-rich Kanban board application built with **React**, **TypeScript**, and **Vite**. It allows users to create, update, and delete columns and tasks, as well as drag-and-drop tasks between columns seamlessly.
 
-https://github.com/user-attachments/assets/611a3265-c267-4abe-aa73-a74be1eb1aa5
+[https://github.com/user-attachments/assets/611a3265-c267-4abe-aa73-a74be1eb1aa5](https://github.com/user-attachments/assets/89947eb7-801f-4fc0-9ff5-4bd3b0225e01
+)
 
 ---
 
